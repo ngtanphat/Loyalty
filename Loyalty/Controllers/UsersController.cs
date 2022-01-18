@@ -10,12 +10,26 @@ namespace Loyalty.Controllers
     {
         public static List<Users> User = new List<Users>();
 
-        [HttpGet] // Get users
-        public IActionResult GetAll()
+        private readonly MyDbContext _context;
+
+        public UsersController(MyDbContext context)
         {
-            return Ok(User);
+            _context = context;
         }
+
+        [HttpGet] // Get users
+
+        //public IActionResult GetAll()
+        //{
+        //    return Ok(User);
+        //}
+        public async Task<ActionResult<List<Users>>> Get()
+        {
+            return Ok(await _context.User.ToListAsync());
+        }
+
         [HttpGet("{id}")] //find user with id.
+
         public IActionResult GetById(string id)
         {
             try
@@ -34,23 +48,32 @@ namespace Loyalty.Controllers
         }
 
         [HttpPost] //create users
-        public IActionResult Create(Users users)
+
+        //public IActionResult Create(Users users)
+        //{
+        //    var user = new Users
+        //    {
+        //        ID = Guid.NewGuid(), //random id
+        //        Email = users.Email,
+        //        Password = users.Password,
+        //        Username = users.Username,
+        //    };
+        //    User.Add(user);
+        //    return Ok(new
+        //    {
+        //        Success = true, Data = user
+        //    }); ;
+        //}
+
+        public async Task<ActionResult<List<Users>>> Add (Users users)
         {
-            var user = new Users
-            {
-                ID = Guid.NewGuid(), //random id
-                Email = users.Email,
-                Password = users.Password,
-                Username = users.Username,
-            };
-            User.Add(user);
-            return Ok(new
-            {
-                Success = true, Data = user
-            }); ;
+            _context.User.Add(users);
+            await _context.SaveChangesAsync();
+            return Ok(await _context.User.ToListAsync());
         }
 
         [HttpPut("{id}")] //edit users
+
         public IActionResult Edit (string id, Users usersEdit)
         {
             try
