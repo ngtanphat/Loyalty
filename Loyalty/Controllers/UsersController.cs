@@ -19,10 +19,6 @@ namespace Loyalty.Controllers
 
         [HttpGet] // Get users
 
-        //public IActionResult GetAll()
-        //{
-        //    return Ok(User);
-        //}
         public async Task<ActionResult<List<Users>>> Get()
         {
             return Ok(await _context.User.ToListAsync());
@@ -30,67 +26,45 @@ namespace Loyalty.Controllers
 
         [HttpGet("{id}")] //find user with id.
 
-        public IActionResult GetById(string id)
+        public async Task<ActionResult<List<Users>>> GetById(Guid id)
         {
-            try
-            {
-                var user = User.SingleOrDefault(user => user.ID == Guid.Parse(id));
+                var user = await _context.User.FindAsync(id);
                 if (user == null)
-                {
-                    return NotFound();
-                }
+                    return BadRequest("user not found");
                 return Ok(user);
-            }
-            catch
-            {
-                return BadRequest();
-            }
         }
 
         [HttpPost] //create users
 
-        //public IActionResult Create(Users users)
-        //{
-        //    var user = new Users
-        //    {
-        //        ID = Guid.NewGuid(), //random id
-        //        Email = users.Email,
-        //        Password = users.Password,
-        //        Username = users.Username,
-        //    };
-        //    User.Add(user);
-        //    return Ok(new
-        //    {
-        //        Success = true, Data = user
-        //    }); ;
-        //}
 
         public async Task<ActionResult<List<Users>>> Add (Users users)
         {
             _context.User.Add(users);
+            var existingUser = await _context.User.FindAsync(users.Username);
+            if (existingUser != null)
+            {
+                return BadRequest("User available");
+            }
             await _context.SaveChangesAsync();
             return Ok(await _context.User.ToListAsync());
         }
 
         [HttpPut("{id}")] //edit users
 
-        public IActionResult Edit (string id, Users usersEdit)
+        public async Task<ActionResult<List<Users>>> Edit (Users usersEdit)
         {
             try
             {
-                var user = User.SingleOrDefault(user => user.ID == Guid.Parse(id));
+                var user = await _context.User.FindAsync(usersEdit.ID);
                 if (user == null)
-                {
-                    return NotFound();
-                }
-                if (id != user.ID.ToString())
-                {
-                    return BadRequest();
-                }
-                user.Username = usersEdit.Username;
+                    return BadRequest("User not found");
+
                 user.Email = usersEdit.Email;
+                user.Username = usersEdit.Username;
                 user.Password = usersEdit.Password;
-                return Ok(user);
+
+                await _context.SaveChangesAsync();
+                return Ok(await _context.User.ToListAsync());
             }
             catch
             {
@@ -99,22 +73,15 @@ namespace Loyalty.Controllers
         }
 
         [HttpDelete("{id}")] //delete users
-        public IActionResult Delete(string id)
+        
+        public async Task<ActionResult<List<Users>>> Delete(Users deleteUser)
         {
-            try
-            {
-                var user = User.SingleOrDefault(user => user.ID == Guid.Parse(id));
-                if (user == null)
-                {
-                    return NotFound();
-                }
-                User.Remove(user);
-                return Ok();
-            }
-            catch
-            {
-                return BadRequest();
-            }
+            var user = await _context.User.FindAsync(deleteUser.ID);
+            if (user == null)
+                return BadRequest("User not found");
+            _context.User.Remove(user);
+            await  _context.SaveChangesAsync();
+            return Ok(await _context.User.ToListAsync());
         }
     }
 }
