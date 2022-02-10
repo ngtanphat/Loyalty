@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Loyalty.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace Loyalty.Data
 {
@@ -6,5 +7,7 @@ namespace Loyalty.Data
     {
         public MyDbContext (DbContextOptions<MyDbContext> options): base(options) { }
         public DbSet<Users> User { get; set; }
+        public DbSet<Category> Category { get; set; }
+        public DbSet<Product> Product { get; set; }
     }
 }
